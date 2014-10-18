@@ -1,32 +1,37 @@
 package com.cloudinary.test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import android.graphics.Rect;
 import android.test.InstrumentationTestCase;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Coordinates;
 import com.cloudinary.Transformation;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+/*
+ * In order to run the UploaderTests you have to include a CLOUDINARY_URL in the androidTest/AndroidManifest.xml
+ * and then remove the @Suppress annotation below
+ */
+@Suppress
 public class UploaderTest extends InstrumentationTestCase {
 
 	private Cloudinary cloudinary;
 	private static boolean first = true;
 
 	public void setUp() throws Exception {
-		this.cloudinary = new Cloudinary(getInstrumentation().getContext());
+		this.cloudinary = Cloudinary.from(getInstrumentation().getContext());
 		if (first) {
 			first = false;
 			if (cloudinary.config.apiSecret == null) {
@@ -54,7 +59,7 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testUnsignedUpload() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		JSONObject result = cloudinary.uploader().unsignedUpload(getAssetStream("images/logo.png"), "sample_preset_dhfjhriu", Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().unsignedUpload(getAssetStream("images/logo.png"), "sample_preset_dhfjhriu", Collections.emptyMap());
 		assertEquals(result.getLong("width"), 241L);
 		assertEquals(result.getLong("height"), 51L);
 		Map<String, Object> to_sign = new HashMap<String, Object>();
@@ -66,7 +71,7 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testUploadUrl() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		JSONObject result = cloudinary.uploader().upload("http://cloudinary.com/images/logo.png", Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().upload("http://cloudinary.com/images/logo.png", Collections.emptyMap());
         assertEquals(result.getLong("width"), 241L);
         assertEquals(result.getLong("height"), 51L);
         Map<String, Object> to_sign = new HashMap<String, Object>();
@@ -78,7 +83,7 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testUploadDataUri() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-    	JSONObject result = cloudinary.uploader().upload("data:image/png;base64,iVBORw0KGgoAA\nAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l\nEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6\nP9/AFGGFyjOXZtQAAAAAElFTkSuQmCC", Cloudinary.emptyMap());
+    	JSONObject result = cloudinary.uploader().upload("data:image/png;base64,iVBORw0KGgoAA\nAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l\nEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6\nP9/AFGGFyjOXZtQAAAAAElFTkSuQmCC", Collections.emptyMap());
         assertEquals(result.getLong("width"), 16L);
         assertEquals(result.getLong("height"), 16L);
         Map<String, Object> to_sign = new HashMap<String, Object>();
@@ -111,14 +116,14 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testRename() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		JSONObject result = cloudinary.uploader().upload(getAssetStream("images/logo.png"), Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().upload(getAssetStream("images/logo.png"), Collections.emptyMap());
 
-		cloudinary.uploader().rename(result.getString("public_id"), result.get("public_id") + "2", Cloudinary.emptyMap());
+		cloudinary.uploader().rename(result.getString("public_id"), result.get("public_id") + "2", Collections.emptyMap());
 
-		JSONObject result2 = cloudinary.uploader().upload(getAssetStream("images/favicon.ico"), Cloudinary.emptyMap());
+		JSONObject result2 = cloudinary.uploader().upload(getAssetStream("images/favicon.ico"), Collections.emptyMap());
 		boolean error_found = false;
 		try {
-			cloudinary.uploader().rename((String) result2.get("public_id"), result.get("public_id") + "2", Cloudinary.emptyMap());
+			cloudinary.uploader().rename((String) result2.get("public_id"), result.get("public_id") + "2", Collections.emptyMap());
 		} catch (Exception e) {
 			error_found = true;
 		}
@@ -153,7 +158,7 @@ public class UploaderTest extends InstrumentationTestCase {
 
 	public void testText() throws Exception {
 		if (cloudinary.config.apiSecret == null) return;
-		JSONObject result = cloudinary.uploader().text("hello world", Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().text("hello world", Collections.emptyMap());
 		assertTrue(result.getInt("width") > 1);
 		assertTrue(result.getInt("height") > 1);
 	}
@@ -164,7 +169,7 @@ public class UploaderTest extends InstrumentationTestCase {
 				Cloudinary.asMap("tags", "sprite_test_tag", "public_id", "sprite_test_tag_1"));
 		cloudinary.uploader().upload(getAssetStream("images/logo.png"),
 				Cloudinary.asMap("tags", "sprite_test_tag", "public_id", "sprite_test_tag_2"));
-		JSONObject result = cloudinary.uploader().generate_sprite("sprite_test_tag", Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().generate_sprite("sprite_test_tag", Collections.emptyMap());
 		assertEquals(2, result.getJSONObject("image_infos").length());
 		result = cloudinary.uploader().generate_sprite("sprite_test_tag", Cloudinary.asMap("transformation", "w_100"));
 		assertTrue((result.getString("css_url")).contains("w_100"));
@@ -179,7 +184,7 @@ public class UploaderTest extends InstrumentationTestCase {
 				Cloudinary.asMap("tags", "multi_test_tag", "public_id", "multi_test_tag_1"));
 		cloudinary.uploader().upload(getAssetStream("images/logo.png"),
 				Cloudinary.asMap("tags", "multi_test_tag", "public_id", "multi_test_tag_2"));
-		JSONObject result = cloudinary.uploader().multi("multi_test_tag", Cloudinary.emptyMap());
+		JSONObject result = cloudinary.uploader().multi("multi_test_tag", Collections.emptyMap());
 		assertTrue((result.getString("url")).endsWith(".gif"));
 		result = cloudinary.uploader().multi("multi_test_tag", Cloudinary.asMap("transformation", "w_100"));
 		assertTrue((result.getString("url")).contains("w_100"));
