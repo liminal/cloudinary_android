@@ -1,13 +1,15 @@
 package com.cloudinary.test;
 
+import java.util.Collections;
 import java.util.Map;
 
 import android.test.AndroidTestCase;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Configuration;
 import com.cloudinary.Transformation;
 
-@SuppressWarnings({ "unchecked" })
+//@SuppressWarnings({ "unchecked" })
 public class CloudinaryTest extends AndroidTestCase {
 
 	private Cloudinary cloudinary;
@@ -42,7 +44,10 @@ public class CloudinaryTest extends AndroidTestCase {
 
 	public void testSecureDistibution() {
 		// should take secure distribution from config if secure=TRUE
-		cloudinary.config.secureDistribution = "config.secure.distribution.com";
+        Configuration conf = new Configuration.Builder().from(this.cloudinary.config)
+                .setSecureDistribution("config.secure.distribution.com")
+                .build();
+        Cloudinary cloudinary = new Cloudinary(conf);
 		String result = cloudinary.url().secure(true).generate("test");
 		assertEquals("https://config.secure.distribution.com/test123/image/upload/test", result);
 	}
@@ -50,25 +55,37 @@ public class CloudinaryTest extends AndroidTestCase {
 	public void testSecureAkamai() {
 		// should default to akamai if secure is given with private_cdn and no
 		// secure_distribution
-		cloudinary.config.secure = true;
-		cloudinary.config.privateCdn = true;
-		String result = cloudinary.url().generate("test");
+        Configuration conf = new Configuration.Builder().from(this.cloudinary.config)
+                .setSecure(true)
+                .setPrivateCdn(true)
+                .build();
+        Cloudinary cloudinary = new Cloudinary(conf);
+
+        String result = cloudinary.url().generate("test");
 		assertEquals("https://test123-res.cloudinary.com/image/upload/test", result);
 	}
 
 	public void testSecureNonAkamai() {
 		// should not add cloud_name if private_cdn and secure non akamai
 		// secure_distribution
-		cloudinary.config.secure = true;
-		cloudinary.config.privateCdn = true;
-		cloudinary.config.secureDistribution = "something.cloudfront.net";
-		String result = cloudinary.url().generate("test");
+        Configuration conf = new Configuration.Builder().from(this.cloudinary.config)
+                .setSecure(true)
+                .setPrivateCdn(true)
+                .setSecureDistribution("something.cloudfront.net")
+                .build();
+        Cloudinary cloudinary = new Cloudinary(conf);
+
+        String result = cloudinary.url().generate("test");
 		assertEquals("https://something.cloudfront.net/image/upload/test", result);
 	}
 
 	public void testHttpPrivateCdn() {
 		// should not add cloud_name if private_cdn and not secure
-		cloudinary.config.privateCdn = true;
+        Configuration conf = new Configuration.Builder().from(this.cloudinary.config)
+                .setPrivateCdn(true)
+                .build();
+        Cloudinary cloudinary = new Cloudinary(conf);
+
 		String result = cloudinary.url().generate("test");
 		assertEquals("http://test123-res.cloudinary.com/image/upload/test", result);
 	}
@@ -83,8 +100,8 @@ public class CloudinaryTest extends AndroidTestCase {
 		Transformation transformation = new Transformation().width(100).height(101);
 		String result = cloudinary.url().transformation(transformation).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/upload/h_101,w_100/test", result);
-		assertEquals("101", transformation.getHtmlHeight().toString());
-		assertEquals("100", transformation.getHtmlWidth().toString());
+		assertEquals("101", transformation.getHtmlHeight());
+		assertEquals("100", transformation.getHtmlWidth());
 		transformation = new Transformation().width(100).height(101).crop("crop");
 		result = cloudinary.url().transformation(transformation).generate("test");
 		assertEquals("http://res.cloudinary.com/test123/image/upload/c_crop,h_101,w_100/test", result);
@@ -115,7 +132,7 @@ public class CloudinaryTest extends AndroidTestCase {
 		// should support base transformation
 		Transformation transformation = new Transformation().x(100).y(100).crop("fill").chain().crop("crop").width(100);
 		String result = cloudinary.url().transformation(transformation).generate("test");
-		assertEquals("100", transformation.getHtmlWidth().toString());
+		assertEquals("100", transformation.getHtmlWidth());
 		assertEquals("http://res.cloudinary.com/test123/image/upload/c_fill,x_100,y_100/c_crop,w_100/test", result);
 	}
 
@@ -124,7 +141,7 @@ public class CloudinaryTest extends AndroidTestCase {
 		Transformation transformation = new Transformation().x(100).y(100).width(200).crop("fill").chain().radius(10).chain().crop("crop")
 				.width(100);
 		String result = cloudinary.url().transformation(transformation).generate("test");
-		assertEquals("100", transformation.getHtmlWidth().toString());
+		assertEquals("100", transformation.getHtmlWidth());
 		assertEquals("http://res.cloudinary.com/test123/image/upload/c_fill,w_200,x_100,y_100/r_10/c_crop,w_100/test", result);
 	}
 
