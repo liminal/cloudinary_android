@@ -14,8 +14,6 @@ import java.util.zip.CRC32;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import com.cloudinary.Cloudinary.Configuration;
-
 public class Url {
 	private final Configuration config;
 	boolean shorten;
