@@ -1,3 +1,8 @@
+## Please note that this is a heavily refactored fork of cloudinary/cloudinary_android
+I give no guarantees that it's working at this time and the classes and methods may
+differ quite a lot. I'm just refactoring and cleaning up for the joy of it :)
+That said, if it's helpful to you feel free to use it!
+
 Cloudinary
 ==========
 
@@ -67,10 +72,11 @@ The entry point of the library is the Cloudinary object.
 
 Here's an example of setting the configuration parameters programatically:
 
-    Map config = new HashMap();
-    config.put("cloud_name", "n07t21i7");
-    config.put("api_key", "123456789012345");
-    config.put("api_secret", "abcdeghijklmnopqrstuvwxyz12");
+    Configuration config = new Configuration.Builder()
+            .setCloudName("n07t2li7")
+            .setApiKey("123456789012345")
+            .setApiSecret("abcdeghijklmnopqrstuvwxyz12")
+            .build();
     Cloudinary cloudinary = new Cloudinary(config);
 
 Another example of setting the configuration parameters by providing the CLOUDINARY_URL value to the constructor:

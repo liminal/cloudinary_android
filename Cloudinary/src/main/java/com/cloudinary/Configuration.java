@@ -48,7 +48,9 @@ public class Configuration {
     /**
      * Create a Configuration from a cloudinary url
      *
-     * @param cloudinaryUrl
+     * Example url: cloudinary://123456789012345:abcdeghijklmnopqrstuvwxyz12@n07t21i7
+     *
+     * @param cloudinaryUrl configuration url
      * @return
      */
     public static Configuration from(String cloudinaryUrl) {
