@@ -52,19 +52,20 @@ public class Cloudinary {
 		this.config = Configuration.from(parseConfigUrl(cloudinaryUrl));
 	}
 
-	public Cloudinary(Context context) {
-		this.config = new Configuration();
+	public static Cloudinary from(Context context) {
 		try {
 			PackageManager packageManager = context.getPackageManager();
 			ApplicationInfo info = packageManager.getApplicationInfo( context.getPackageName(), PackageManager.GET_META_DATA);
-			if (info == null|| info.metaData == null) return;
-			String cloudinaryUrl = (String) info.metaData.get("CLOUDINARY_URL");
-			if (cloudinaryUrl == null) return;
-			this.config.update(parseConfigUrl(cloudinaryUrl));
+			if (info != null && info.metaData != null) {
+                String cloudinaryUrl = (String) info.metaData.get("CLOUDINARY_URL");
+                if (cloudinaryUrl != null) {
+                    return new Cloudinary(Configuration.from(parseConfigUrl(cloudinaryUrl)));
+                }
+            }
 		} catch (NameNotFoundException e) {
 			// No metadata found
 		}
-		
+        throw new IllegalArgumentException("Cannot find CLOUDINARY_URL in context metadata");
 	}
 
 	public Url url() {
