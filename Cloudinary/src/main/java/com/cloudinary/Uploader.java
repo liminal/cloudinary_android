@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class Uploader {
 	static final String[] BOOLEAN_UPLOAD_OPTIONS = new String[] {"backup", "exif", "faces", "colors", "image_metadata", "use_filename", "unique_filename", "eager_async", "invalidate", "discard_original_filename", "overwrite", "phash"};
 
 	public Map<String, Object> buildUploadParams(Map options) {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("public_id", (String) options.get("public_id"));
 		params.put("callback", (String) options.get("callback"));
@@ -74,13 +75,13 @@ public class Uploader {
 	}
 
 	public JSONObject upload(Object file, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = buildUploadParams(options);
 		return callApi("upload", params, options, file);
 	}
 
 	public JSONObject unsignedUpload(Object file, String uploadPreset, Map options) throws IOException {        
-		if (options == null) options = Cloudinary.emptyMap();
+		if (options == null) options = Collections.emptyMap();
 		options = new HashMap(options);
 		options.put("upload_preset", uploadPreset);
 		options.put("unsigned", true);
@@ -88,7 +89,7 @@ public class Uploader {
 	}
 
 	public JSONObject destroy(String publicId, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("type", (String) options.get("type"));
 		params.put("public_id", publicId);
@@ -97,7 +98,7 @@ public class Uploader {
 	}
 
 	public JSONObject rename(String fromPublicId, String toPublicId, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("type", (String) options.get("type"));
 		params.put("overwrite", Cloudinary.asBoolean(options.get("overwrite"), false).toString());			
@@ -107,7 +108,7 @@ public class Uploader {
 	}
 
 	public JSONObject explicit(String publicId, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("public_id", publicId);
 		params.put("callback", (String) options.get("callback"));
@@ -119,7 +120,7 @@ public class Uploader {
 	}
 
 	public JSONObject generate_sprite(String tag, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		Object transParam = options.get("transformation");
 		Transformation transformation = null;
@@ -142,7 +143,7 @@ public class Uploader {
 	}
 
 	public JSONObject multi(String tag, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		Object transformation = options.get("transformation");
 		if (transformation != null) {
@@ -159,7 +160,7 @@ public class Uploader {
 	}
 
 	public JSONObject explode(String public_id, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		Object transformation = options.get("transformation");
 		if (transformation != null) {
@@ -177,24 +178,24 @@ public class Uploader {
 	// options may include 'exclusive' (boolean) which causes clearing this tag
 	// from all other resources
 	public JSONObject addTag(String tag, String[] publicIds, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		boolean exclusive = Cloudinary.asBoolean(options.get("exclusive"), false);
 		String command = exclusive ? "set_exclusive" : "add";
 		return callTagsApi(tag, command, publicIds, options);
 	}
 
 	public JSONObject removeTag(String tag, String[] publicIds, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		return callTagsApi(tag, "remove", publicIds, options);
 	}
 
 	public JSONObject replaceTag(String tag, String[] publicIds, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		return callTagsApi(tag, "replace", publicIds, options);
 	}
 
 	public JSONObject callTagsApi(String tag, String command, String[] publicIds, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("tag", tag);
 		params.put("command", command);
@@ -207,7 +208,7 @@ public class Uploader {
 			"font_style", "background", "opacity", "text_decoration" };
 
 	public JSONObject text(String text, Map options) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("text", text);
 		for (String param : TEXT_PARAMS) {
@@ -217,7 +218,7 @@ public class Uploader {
 	}
 
 	public JSONObject callApi(String action, Map<String, Object> params, Map options, Object file) throws IOException {
-        if (options == null) options = Cloudinary.emptyMap();
+        if (options == null) options = Collections.emptyMap();
 		boolean returnError = Cloudinary.asBoolean(options.get("return_error"), false);
 		String apiKey = Cloudinary.asString(options.get("api_key"), this.cloudinary.config.apiKey);
 		boolean unsigned = Boolean.TRUE.equals(options.get("unsigned"));

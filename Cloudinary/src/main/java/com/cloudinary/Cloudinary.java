@@ -240,10 +240,6 @@ public class Cloudinary {
 		return result;
 	}
 
-	public static Map emptyMap() {
-		return Collections.EMPTY_MAP;
-	}
-
 	public static String encodeMap(Object arg) {
 		if (arg != null && arg instanceof Map) {
 			Map<String,String> mapArg = (Map<String,String>) arg;

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -238,10 +239,7 @@ public class Url {
 		return TextUtils.join("/", new String[] { prefix, resourceType, type, rest }).replaceAll("([^:])\\/+", "$1/");
 	}
 	
-	@SuppressWarnings("unchecked")
-	public String imageTag(String source) {
-		return imageTag(source, Cloudinary.emptyMap());
-	}
+	public String imageTag(String source) { return imageTag(source, Collections.<String, String>emptyMap()); }
 
 	public String imageTag(String source, Map<String, String> attributes) {
 		String url = generate(source);
