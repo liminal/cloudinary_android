@@ -41,15 +41,15 @@ public class Cloudinary {
 	public final Configuration config;
 
     public Cloudinary(Map config) {
-		this.config = new Configuration(config);
+		this.config = Configuration.from(config);
 	}
 
 	public Cloudinary(Configuration config) {
-		this.config = new Configuration(config);
+		this.config = Configuration.from(config);
 	}
 
 	public Cloudinary(String cloudinaryUrl) {
-		this.config = new Configuration(parseConfigUrl(cloudinaryUrl));
+		this.config = Configuration.from(parseConfigUrl(cloudinaryUrl));
 	}
 
 	public Cloudinary(Context context) {
@@ -165,7 +165,7 @@ public class Cloudinary {
 		return builder.toString();
 	}
 
-	protected Map parseConfigUrl(String cloudinaryUrl) {
+	protected static Map parseConfigUrl(String cloudinaryUrl) {
 		Map params = new HashMap();
 		URI cloudinaryUri = URI.create(cloudinaryUrl);
 		params.put("cloud_name", cloudinaryUri.getHost());

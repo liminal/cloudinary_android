@@ -15,8 +15,8 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 public class Url {
-	private final Configuration config;
-	boolean shorten;
+	private final Configuration.Builder configBuilder;
+
 	String publicId = null;
 	String type = "upload";
 	String resourceType = "image";
@@ -26,7 +26,7 @@ public class Url {
 	boolean signUrl;
 
 	public Url(Cloudinary cloudinary) {
-		this.config = new Configuration(cloudinary.config);
+		this.configBuilder = new Configuration.Builder().from(cloudinary.config);
 	}
 
 	private static Pattern identifierPattern = Pattern.compile(
@@ -97,17 +97,17 @@ public class Url {
 	}
 
 	public Url cloudName(String cloudName) {
-		this.config.cloudName = cloudName;
+		this.configBuilder.setCloudName(cloudName);
 		return this;
 	}
 
 	public Url secureDistribution(String secureDistribution) {
-		this.config.secureDistribution = secureDistribution;
+		this.configBuilder.setSecureDistribution(secureDistribution);
 		return this;
 	}
 
 	public Url cname(String cname) {
-		this.config.cname = cname;
+		this.configBuilder.setCname(cname);
 		return this;
 	}
 
@@ -122,22 +122,22 @@ public class Url {
 	}
 
 	public Url secure(boolean secure) {
-		this.config.secure = secure;
+		this.configBuilder.setSecure(secure);
 		return this;
 	}
 
 	public Url privateCdn(boolean privateCdn) {
-		this.config.privateCdn = privateCdn;
+		this.configBuilder.setPrivateCdn(privateCdn);
 		return this;
 	}
 
 	public Url cdnSubdomain(boolean cdnSubdomain) {
-		this.config.cdnSubdomain = cdnSubdomain;
+		this.configBuilder.setCdnSubdomain(cdnSubdomain);
 		return this;
 	}
 
 	public Url shorten(boolean shorten) {
-		this.config.shorten = shorten;
+		this.configBuilder.setShorten(shorten);
 		return this;
 	}
 
@@ -157,12 +157,13 @@ public class Url {
 	}
 
 	public String generate(String source) {
+        Configuration config = this.configBuilder.build();
 		if (type.equals("fetch") && !TextUtils.isEmpty(format)) {
 			transformation().fetchFormat(format);
 			this.format = null;
 		}
 		String transformationStr = transformation().generate();
-		if (TextUtils.isEmpty(this.config.cloudName)) {
+		if (TextUtils.isEmpty(config.cloudName)) {
 			throw new IllegalArgumentException("Must supply cloud_name in tag or in configuration");
 		}
 
@@ -190,11 +191,12 @@ public class Url {
 		String prefix;
 		boolean sharedDomain = !config.privateCdn;
 		if (config.secure) {
-			if (TextUtils.isEmpty(config.secureDistribution) || Cloudinary.OLD_AKAMAI_SHARED_CDN.equals(config.secureDistribution)) {
-				config.secureDistribution = config.privateCdn ? config.cloudName + "-res.cloudinary.com" : Cloudinary.SHARED_CDN;
+            String secureDist = config.secureDistribution;
+			if (TextUtils.isEmpty(secureDist) || Cloudinary.OLD_AKAMAI_SHARED_CDN.equals(secureDist)) {
+				secureDist = config.privateCdn ? config.cloudName + "-res.cloudinary.com" : Cloudinary.SHARED_CDN;
 			}
-			sharedDomain = sharedDomain || Cloudinary.SHARED_CDN.equals(config.secureDistribution) ;
-			prefix = "https://" + config.secureDistribution;
+			sharedDomain = sharedDomain || Cloudinary.SHARED_CDN.equals(secureDist) ;
+			prefix = "https://" + secureDist;
 		} else {
 			CRC32 crc32 = new CRC32();
 			crc32.update(source.getBytes());
@@ -225,11 +227,10 @@ public class Url {
 			MessageDigest md = null;
 	        try {
 	            md = MessageDigest.getInstance("SHA-1");
-	        }
-	        catch(NoSuchAlgorithmException e) {
+	        } catch(NoSuchAlgorithmException e) {
 	            throw new RuntimeException("Unexpected exception", e);
 	        }
-	        byte[] digest = md.digest((rest + this.config.apiSecret).getBytes());
+	        byte[] digest = md.digest((rest + config.apiSecret).getBytes());
 	        String signature = Base64.encodeToString(digest, Base64.NO_PADDING | Base64.URL_SAFE);
 			rest = "s--" + signature.substring(0, 8) + "--/" + rest;
 		}
