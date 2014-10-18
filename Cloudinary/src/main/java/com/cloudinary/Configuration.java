@@ -1,5 +1,11 @@
 package com.cloudinary;
 
+import android.text.TextUtils;
+import android.util.Log;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
 import java.util.Map;
 
 /**
@@ -17,7 +23,7 @@ public class Configuration {
     public final boolean cdnSubdomain;
     public final boolean shorten;
 
-    public Configuration(String cloudName, String apiKey, String apiSecret, String secureDistribution, String cname, String uploadPrefix, boolean secure, boolean privateCdn, boolean cdnSubdomain, boolean shorten) {
+    private Configuration(String cloudName, String apiKey, String apiSecret, String secureDistribution, String cname, String uploadPrefix, boolean secure, boolean privateCdn, boolean cdnSubdomain, boolean shorten) {
         this.cloudName = cloudName;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
@@ -30,11 +36,33 @@ public class Configuration {
         this.shorten = shorten;
     }
 
+    /**
+     * Create a new Configuration from an existing one
+     * @param other
+     * @return
+     */
     public static Configuration from(Configuration other) {
         return new Builder().from(other).build();
     }
 
-    public static Configuration from(Map config) {
+    /**
+     * Create a Configuration from a cloudinary url
+     *
+     * @param cloudinaryUrl
+     * @return
+     */
+    public static Configuration from(String cloudinaryUrl) {
+        return from(parseConfigUrl(cloudinaryUrl));
+    }
+
+    /**
+     * Build a configuration object from a Map
+     *
+     * @param config Map of configuration options
+     * @return configuration
+     */
+    @Deprecated
+    public static Configuration from(Map<String, Object> config) {
         return new Builder()
                 .setCloudName((String)config.get("cloud_name"))
                 .setApiKey((String) config.get("api_key"))
@@ -48,6 +76,53 @@ public class Configuration {
                 .setShorten(Cloudinary.asBoolean(config.get("shorten"), false))
                 .build();
     }
+
+    private static Configuration parseConfigUrl(String cloudinaryUrl) {
+        Builder builder = new Builder();
+
+        URI cloudinaryUri = URI.create(cloudinaryUrl);
+        builder.setCloudName(cloudinaryUri.getHost());
+        if (cloudinaryUri.getUserInfo() != null) {
+            String[] creds = cloudinaryUri.getUserInfo().split(":");
+            builder.setApiKey(creds[0]);
+            builder.setApiSecret(creds[1]);
+        }
+        builder.setPrivateCdn(!TextUtils.isEmpty(cloudinaryUri.getPath()));
+        builder.setSecureDistribution(cloudinaryUri.getPath());
+        if (cloudinaryUri.getQuery() != null) {
+            for (String param : cloudinaryUri.getQuery().split("&")) {
+                String[] keyValue = param.split("=");
+                String val = null;
+                try {
+//                    params.put(keyValue[0], URLDecoder.decode(keyValue[1], "ASCII"));
+                    val = URLDecoder.decode(keyValue[1], "ASCII");
+                } catch (UnsupportedEncodingException e) {
+                    throw new IllegalArgumentException("Error decoding cloudinaryUrl", e);
+                }
+                switch (keyValue[0]) {
+                    case "cname":
+                        builder.setCname(val);
+                        break;
+                    case "upload_prefix":
+                        builder.setUploadPrefix(val);
+                        break;
+                    case "secure":
+                        builder.setSecure(Cloudinary.asBoolean(val, false));
+                        break;
+                    case "cdn_subdomain":
+                        builder.setCdnSubdomain(Cloudinary.asBoolean(val, false));
+                        break;
+                    case "shorten":
+                        builder.setShorten(Cloudinary.asBoolean(val, false));
+                        break;
+                    default:
+                        Log.w("Cloudinary", "ignoring invalid parameter " + val);
+                }
+            }
+        }
+        return builder.build();
+    }
+
 
     /**
      * Build a new {@link Configuration}

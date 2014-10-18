@@ -40,6 +40,7 @@ public class Cloudinary {
 	
 	public final Configuration config;
 
+    @Deprecated
     public Cloudinary(Map config) {
 		this.config = Configuration.from(config);
 	}
@@ -49,7 +50,7 @@ public class Cloudinary {
 	}
 
 	public Cloudinary(String cloudinaryUrl) {
-		this.config = Configuration.from(parseConfigUrl(cloudinaryUrl));
+		this.config = Configuration.from(cloudinaryUrl);
 	}
 
 	public static Cloudinary from(Context context) {
@@ -59,7 +60,7 @@ public class Cloudinary {
 			if (info != null && info.metaData != null) {
                 String cloudinaryUrl = (String) info.metaData.get("CLOUDINARY_URL");
                 if (cloudinaryUrl != null) {
-                    return new Cloudinary(Configuration.from(parseConfigUrl(cloudinaryUrl)));
+                    return new Cloudinary(Configuration.from(cloudinaryUrl));
                 }
             }
 		} catch (NameNotFoundException e) {
@@ -166,29 +167,6 @@ public class Cloudinary {
 		return builder.toString();
 	}
 
-	protected static Map parseConfigUrl(String cloudinaryUrl) {
-		Map params = new HashMap();
-		URI cloudinaryUri = URI.create(cloudinaryUrl);
-		params.put("cloud_name", cloudinaryUri.getHost());
-		if (cloudinaryUri.getUserInfo() != null) {
-			String[] creds = cloudinaryUri.getUserInfo().split(":");
-			params.put("api_key", creds[0]);
-			params.put("api_secret", creds[1]);
-		}
-		params.put("private_cdn", !TextUtils.isEmpty(cloudinaryUri.getPath()));
-		params.put("secure_distribution", cloudinaryUri.getPath());
-		if (cloudinaryUri.getQuery() != null) {
-			for (String param : cloudinaryUri.getQuery().split("&")) {
-				String[] keyValue = param.split("=");
-				try {
-					params.put(keyValue[0], URLDecoder.decode(keyValue[1], "ASCII"));
-				} catch (UnsupportedEncodingException e) {
-					throw new RuntimeException("Unexpected exception", e);
-				}
-			}
-		}
-		return params;
-	}
 
 	public static String asString(Object value) {
 		if (value == null) {
