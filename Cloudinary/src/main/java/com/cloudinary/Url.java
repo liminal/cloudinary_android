@@ -30,7 +30,7 @@ public class Url {
 		this.configBuilder = new Configuration.Builder().from(cloudinary.config);
 	}
 
-	private static Pattern identifierPattern = Pattern.compile(
+	private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(
 			"^(?:([^/]+)/)??(?:([^/]+)/)??(?:v(\\d+)/)?" + 
 			"(?:([^#/]+?)(?:\\.([^.#/]+))?)(?:#([^/]+))?$");
 	/**
@@ -38,7 +38,7 @@ public class Url {
 	 * [<resource_type>/][<image_type>/][v<version>/]<public_id>[.<format>][#<signature>]
 	 */
 	public Url fromIdentifier(String identifier) {
-		Matcher matcher = identifierPattern.matcher(identifier);
+		Matcher matcher = IDENTIFIER_PATTERN.matcher(identifier);
 		if (!matcher.matches()) {
 			throw new RuntimeException(String.format("Couldn't parse identifier %s", identifier));
 		}
